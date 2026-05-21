@@ -1,0 +1,670 @@
+/* ===========================================================
+   COMIC EDITION OVERLAY
+   Re-skins manga app as a kid-comic book.
+   Loaded AFTER styles.css so it overrides.
+   Paper + bright flat panels + hand lettering + thick ink.
+=========================================================== */
+
+:root {
+  /* re-tint base tokens for comic feel */
+  --paper: #f5ecd6;
+  --paper-warm: #efe2c2;
+  --paper-deep: #e8d6a8;
+  --bubble: #fffaef;
+  --ink: #1a1410;
+  --ink-soft: #3a2e22;
+
+  /* kid-comic palette */
+  --c-yellow: #ffd84d;
+  --c-blue:   #6fbef0;
+  --c-red:    #ff6b4a;
+  --c-mint:   #5cc287;
+  --c-pink:   #ffa3c2;
+  --c-lilac:  #8e7cf0;
+  --c-tang:   #ffb74a;
+  --c-azure:  #4a92d8;
+  --c-night:  #2a2440;
+
+  /* keep manga accent vars but retint */
+  --accent:   var(--c-red);
+  --accent-2: var(--c-yellow);
+  --accent-3: var(--c-blue);
+  --accent-4: var(--c-mint);
+
+  /* fonts — keep manga ones, add comic hand-letter */
+  --font-letter: "Patrick Hand", "Caveat Brush", cursive;
+  --font-comic-title: "Bowlby One", "Bangers", "Impact", sans-serif;
+
+  --ink-w: 4px;
+  --ink-w-fat: 6px;
+}
+
+/* ============== paper background ============== */
+html, body { background: var(--paper); }
+
+/* kill the manga halftone dot field, swap for paper-ish texture */
+#starfield {
+  background:
+    radial-gradient(ellipse 70% 50% at 10% 8%, rgba(255,107,74,0.07), transparent 60%),
+    radial-gradient(ellipse 80% 60% at 90% 92%, rgba(74,146,216,0.06), transparent 60%),
+    var(--paper) !important;
+}
+#starfield::before {
+  background-image:
+    radial-gradient(circle at 18% 32%, rgba(0,0,0,0.025) 1px, transparent 1.5px),
+    radial-gradient(circle at 75% 65%, rgba(0,0,0,0.02) 1.2px, transparent 1.6px),
+    radial-gradient(circle at 50% 50%, rgba(0,0,0,0.018) 1px, transparent 1.5px) !important;
+  background-size: 7px 7px, 11px 11px, 5px 5px !important;
+  opacity: 0.7 !important;
+}
+#starfield::after {
+  background-image:
+    repeating-linear-gradient(34deg, rgba(50,30,5,0.025) 0 1px, transparent 1px 9px),
+    repeating-linear-gradient(122deg, rgba(50,30,5,0.02) 0 1px, transparent 1px 11px) !important;
+  opacity: 0.6 !important;
+}
+
+/* ============== top bar — comic brand chip ============== */
+.brand .logo {
+  background: var(--c-red);
+  color: #fff;
+  font-family: var(--font-comic-title);
+  font-size: 26px;
+  letter-spacing: 0.05em;
+  transform: rotate(-4deg);
+  border-radius: 8px;
+}
+.brand .logo::after { display: none; }
+.brand { font-family: var(--font-comic-title); }
+.brand .accent {
+  background: var(--ink);
+  color: var(--c-yellow);
+  padding: 0 8px;
+  display: inline-block;
+  transform: skewX(-6deg);
+}
+.brand .ja {
+  font-family: var(--font-letter);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+/* HUD chips — comic chunky */
+.hud-chip {
+  font-family: var(--font-comic-title);
+  font-size: 15px;
+  letter-spacing: 0.05em;
+}
+.hud-chip.xp { background: var(--c-mint); color: var(--ink); }
+.hud-chip.coins { background: var(--c-yellow); color: var(--ink); }
+.hud-chip.streak { background: var(--c-red); color: #fff; }
+.hud-chip.lvl { background: var(--c-night); color: var(--c-yellow); }
+.xp-bar > i { background: var(--c-yellow); }
+
+/* ============== buttons — chunky comic ============== */
+.btn {
+  font-family: var(--font-comic-title);
+  letter-spacing: 0.04em;
+  background: var(--c-red);
+  border-radius: 8px;
+  text-transform: uppercase;
+}
+.btn.gold { background: var(--c-yellow); }
+.btn.ghost { background: var(--bubble); }
+.btn.blue { background: var(--c-blue); color: var(--ink); }
+
+/* ============== STORY CARD → COMIC PAGE ============== */
+.story-card {
+  background: var(--bubble);
+  border: var(--ink-w-fat) solid var(--ink);
+  border-radius: 6px;
+  box-shadow:
+    8px 8px 0 var(--ink),
+    14px 14px 0 rgba(0,0,0,0.10);
+  overflow: visible;
+  position: relative;
+}
+/* tape on corners */
+.story-card::before, .story-card::after {
+  content: "";
+  position: absolute;
+  width: 96px;
+  height: 26px;
+  background: rgba(255,225,140,0.65);
+  border: 1px solid rgba(60,40,8,0.35);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  z-index: 5;
+}
+.story-card::before { top: -13px; left: -22px; transform: rotate(-22deg); }
+.story-card::after { top: -13px; right: -22px; transform: rotate(20deg); }
+
+/* the manga-panels area becomes a real comic page top */
+.manga-panels {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  background: transparent;
+  border-bottom: 3px dashed var(--ink);
+  height: auto;
+}
+.manga-panel {
+  border: var(--ink-w-fat) solid var(--ink);
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 var(--ink);
+  min-height: 180px;
+  position: relative;
+  background: var(--c-yellow);
+  transition: transform .15s, box-shadow .15s;
+  cursor: default;
+}
+.manga-panel:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+/* legacy 4-panel layout is replaced when .comic-grid class is set */
+.manga-panels.comic-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 230px 230px; }
+.manga-panels.comic-5 {
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 230px 230px;
+}
+.manga-panels.comic-5 .manga-panel:nth-child(1) { grid-row: 1 / span 2; }
+.manga-panels.comic-6 {
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 200px 200px 200px;
+}
+.manga-panels.comic-6 .manga-panel:nth-child(1) { grid-column: 1 / span 2; grid-row: 1 / span 2; }
+
+/* panel bg colors */
+.manga-panel.bg-1 { background: var(--c-yellow); }
+.manga-panel.bg-2 { background: var(--c-blue); }
+.manga-panel.bg-3 { background: var(--c-red); }
+.manga-panel.bg-4 { background: var(--c-mint); }
+.manga-panel.bg-5 { background: var(--c-pink); }
+.manga-panel.bg-6 { background: var(--c-lilac); }
+.manga-panel.bg-7 { background: var(--c-tang); }
+.manga-panel.bg-8 { background: var(--c-azure); }
+.manga-panel.bg-9 { background: var(--c-night); color: var(--paper); }
+
+/* SVG inside panels fills it */
+.manga-panel > svg,
+.manga-panel > .panel-scene,
+.manga-panel > .panel-scene > svg {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+.manga-panel .panel-scene {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* halftone overlay on every panel — comic shading */
+.manga-panel .pn-halftone {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, var(--ink) 1px, transparent 1.5px);
+  background-size: 7px 7px;
+  opacity: 0.13;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* CAPTION tag — yellow ribbon, top-left of panel */
+.cm-caption {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: var(--c-yellow);
+  border: 3px solid var(--ink);
+  padding: 3px 10px;
+  font-family: var(--font-letter);
+  font-size: 15px;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  max-width: calc(100% - 16px);
+  box-shadow: 2px 2px 0 var(--ink);
+  z-index: 4;
+}
+.cm-caption.br { top: auto; bottom: 8px; left: auto; right: 8px; }
+.cm-caption.bl { top: auto; bottom: 8px; }
+.cm-caption.tr { left: auto; right: 8px; }
+
+/* SPEECH BUBBLE in panel */
+.cm-bubble {
+  position: absolute;
+  background: var(--bubble);
+  border: 3px solid var(--ink);
+  border-radius: 18px / 22px;
+  padding: 7px 12px;
+  font-family: var(--font-letter);
+  font-size: 15px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  max-width: 65%;
+  z-index: 4;
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+}
+.cm-bubble.tl { top: 10px; left: 10px; }
+.cm-bubble.tr { top: 10px; right: 10px; }
+.cm-bubble.bl { bottom: 12px; left: 10px; }
+.cm-bubble.br { bottom: 12px; right: 10px; }
+.cm-bubble .tail {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: var(--bubble);
+  border-right: 3px solid var(--ink);
+  border-bottom: 3px solid var(--ink);
+}
+.cm-bubble.tl .tail { bottom: -9px; left: 22px; transform: rotate(45deg); }
+.cm-bubble.tr .tail { bottom: -9px; right: 22px; transform: rotate(45deg); }
+.cm-bubble.bl .tail { top: -9px; left: 22px; transform: rotate(225deg); }
+.cm-bubble.br .tail { top: -9px; right: 22px; transform: rotate(225deg); }
+
+/* thought bubble — cloudy */
+.cm-bubble.thought {
+  border-radius: 50%;
+  padding: 12px 16px;
+  text-align: center;
+}
+.cm-bubble.thought .tail { display: none; }
+.cm-bubble.thought::before, .cm-bubble.thought::after {
+  content: "";
+  position: absolute;
+  background: var(--bubble);
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+}
+.cm-bubble.thought::before {
+  width: 12px; height: 12px;
+  left: -4px; bottom: -8px;
+}
+.cm-bubble.thought::after {
+  width: 6px; height: 6px;
+  left: -14px; bottom: -18px;
+}
+
+/* yell — spiky */
+.cm-bubble.yell {
+  border: none;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  text-align: center;
+  max-width: 55%;
+}
+.cm-bubble.yell .tail { display: none; }
+.cm-bubble.yell .yell-bg {
+  display: inline-block;
+  background: var(--bubble);
+  padding: 10px 16px;
+  font-family: var(--font-comic-title);
+  font-size: 17px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  -webkit-clip-path: polygon(0% 12%, 8% 0%, 18% 8%, 28% 0%, 38% 8%, 50% 0%, 60% 8%, 70% 0%, 80% 8%, 90% 0%, 100% 12%, 95% 30%, 100% 50%, 92% 70%, 100% 88%, 88% 100%, 78% 92%, 65% 100%, 50% 92%, 35% 100%, 22% 92%, 10% 100%, 0% 88%, 6% 70%, 0% 50%, 6% 30%);
+          clip-path: polygon(0% 12%, 8% 0%, 18% 8%, 28% 0%, 38% 8%, 50% 0%, 60% 8%, 70% 0%, 80% 8%, 90% 0%, 100% 12%, 95% 30%, 100% 50%, 92% 70%, 100% 88%, 88% 100%, 78% 92%, 65% 100%, 50% 92%, 35% 100%, 22% 92%, 10% 100%, 0% 88%, 6% 70%, 0% 50%, 6% 30%);
+  position: relative;
+}
+
+/* SFX — bold lettered burst, overrides .pn-sfx */
+.manga-panel .pn-sfx {
+  font-family: var(--font-comic-title);
+  font-size: 40px;
+  line-height: 1;
+  color: var(--c-yellow);
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 3px 3px 0 var(--ink);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  z-index: 3;
+}
+.cm-sfx {
+  position: absolute;
+  font-family: var(--font-comic-title);
+  font-size: 40px;
+  line-height: 1;
+  color: var(--c-yellow);
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 3px 3px 0 var(--ink);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  z-index: 4;
+  pointer-events: none;
+  text-transform: uppercase;
+  transform: rotate(-8deg);
+}
+.cm-sfx.big { font-size: 54px; }
+.cm-sfx.red { color: var(--c-red); }
+.cm-sfx.blue { color: var(--c-blue); }
+
+/* COVER PANEL — book-cover style for chapter title */
+.cm-cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  z-index: 2;
+  padding: 12px;
+}
+.cm-cover .by {
+  font-family: var(--font-letter);
+  background: var(--c-red);
+  color: #fff;
+  padding: 2px 14px;
+  border: 3px solid var(--ink);
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  transform: rotate(-4deg);
+  white-space: nowrap;
+}
+.cm-cover .big-title {
+  font-family: var(--font-comic-title);
+  font-size: clamp(38px, 5vw, 64px);
+  line-height: 0.95;
+  color: #fff;
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 4px 4px 0 var(--ink);
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0;
+}
+.cm-cover .big-title .row {
+  display: inline-block;
+  padding: 0 12px;
+  background: var(--c-red);
+  border-radius: 3px;
+  transform: rotate(-3deg);
+}
+.cm-cover .big-title .row.alt {
+  background: var(--c-blue);
+  transform: rotate(2deg);
+}
+.cm-cover .and {
+  font-family: var(--font-letter);
+  font-size: 18px;
+  background: var(--c-mint);
+  border: 3px solid var(--ink);
+  padding: 2px 12px;
+  border-radius: 4px;
+  transform: rotate(-6deg);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.cm-cover .sub {
+  font-family: var(--font-comic-title);
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  margin-top: 6px;
+  text-transform: uppercase;
+}
+
+/* cover sun-ray burst behind title */
+.cm-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ============== chapter title (above prose) ============== */
+.chapter-title {
+  font-family: var(--font-comic-title);
+  font-size: 30px;
+  margin: 0 0 14px;
+  text-transform: uppercase;
+}
+.chapter-title::after { background: var(--c-red); }
+
+/* ============== reader prose styling ============== */
+.story-body { padding: 24px clamp(20px, 3.5vw, 40px) 30px; }
+.story-text {
+  font-family: var(--font-letter);
+  letter-spacing: 0.005em;
+  word-spacing: 0.18em;
+}
+.story-text p { font-size: calc(var(--reader-size) - 1px); }
+.story-text .w {
+  display: inline;
+  padding: 0;
+}
+.story-text .w:hover { background: var(--c-yellow); }
+.story-text .w.tricky {
+  background: linear-gradient(180deg, transparent 60%, var(--c-yellow) 60%);
+  border-bottom: 0;
+  font-weight: 600;
+}
+.story-text .w.tricky:hover { background: var(--c-yellow); }
+.story-text .w.speaking { background: var(--c-red); }
+
+/* ============== chapter tag + tools ============== */
+.chapter-tag {
+  font-family: var(--font-comic-title);
+  background: var(--c-yellow);
+  color: var(--ink);
+  padding: 4px 12px;
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: 3px 3px 0 var(--ink);
+  letter-spacing: 0.06em;
+  font-size: 15px;
+  transform: rotate(-2deg);
+}
+.tool-btn {
+  font-family: var(--font-comic-title);
+  background: var(--bubble);
+  border-radius: 6px;
+  padding: 7px 12px;
+  letter-spacing: 0.04em;
+  font-size: 14px;
+}
+.tool-btn:hover { background: var(--c-yellow); }
+.tool-btn.active { background: var(--c-mint); }
+
+.font-step {
+  background: var(--bubble);
+  border-radius: 6px;
+}
+
+/* difficulty pip — keep manga diamond shape but recolor */
+.difficulty-bar .pip.on { background: var(--c-red); }
+
+/* ============== popovers + quiz + choice ============== */
+.word-popover {
+  background: var(--bubble);
+  border-radius: 12px;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.word-popover .ww { font-family: var(--font-comic-title); }
+.word-popover .syll { color: var(--c-red); font-family: var(--font-letter); font-size: 16px; }
+.word-popover .def { font-family: var(--font-letter); font-size: 17px; color: var(--ink); }
+
+.choice-panel, .quiz-panel {
+  background: var(--bubble);
+  border-radius: 10px;
+  border-width: var(--ink-w);
+}
+.choice-panel h4, .quiz-panel h4 {
+  font-family: var(--font-comic-title);
+  letter-spacing: 0.06em;
+}
+
+/* ============== welcome ============== */
+.welcome {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 40px;
+  align-items: center;
+  padding: 30px 0 0;
+}
+.welcome h1 {
+  font-family: var(--font-comic-title);
+}
+.welcome h1 em {
+  font-style: normal;
+  background: var(--c-red);
+  color: #fff;
+  padding: 0 12px;
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke fill;
+  display: inline-block;
+  transform: rotate(-2deg);
+  border-radius: 4px;
+}
+.welcome .hero-eyebrow {
+  font-family: var(--font-comic-title);
+  background: var(--c-yellow);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  padding: 4px 14px;
+  display: inline-block;
+  transform: rotate(-2deg);
+  margin-bottom: 16px;
+  box-shadow: 3px 3px 0 var(--ink);
+  letter-spacing: 0.06em;
+}
+.welcome p.lede { font-family: var(--font-letter); font-size: 19px; line-height: 1.4; }
+
+/* ============== setup screen ============== */
+.setup-card {
+  background: var(--bubble);
+  border-radius: 8px;
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.setup-option {
+  background: var(--bubble);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  box-shadow: 3px 3px 0 var(--ink);
+  font-family: var(--font-letter);
+}
+.setup-option:hover { background: var(--c-yellow); transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
+.setup-option.selected { background: var(--c-mint); }
+.setup-option .opt-label { font-family: var(--font-comic-title); letter-spacing: 0.03em; }
+
+.section-head h2 {
+  font-family: var(--font-comic-title);
+}
+.section-head h2 .stroke {
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke fill;
+  color: var(--c-yellow);
+  background: transparent;
+  display: inline-block;
+}
+
+.step-tag {
+  font-family: var(--font-comic-title);
+  background: var(--c-red);
+  color: #fff;
+  padding: 4px 12px;
+  border: 3px solid var(--ink);
+  display: inline-block;
+  transform: rotate(-2deg);
+  letter-spacing: 0.05em;
+  font-size: 13px;
+  margin-bottom: 10px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+/* character cards */
+.char-card {
+  background: var(--bubble);
+  border: var(--ink-w-fat) solid var(--ink);
+  border-radius: 8px;
+  box-shadow: 6px 6px 0 var(--ink);
+  transition: transform .12s, box-shadow .12s;
+}
+.char-card:hover { transform: translate(-2px,-2px); box-shadow: 9px 9px 0 var(--ink); }
+.char-card.selected { background: var(--c-mint); }
+.char-card h3 { font-family: var(--font-comic-title); }
+.char-card .tagline { font-family: var(--font-letter); font-size: 16px; line-height: 1.35; }
+.char-card .trait {
+  font-family: var(--font-comic-title);
+  background: var(--c-yellow);
+  border: 2px solid var(--ink);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+/* loading screen — comic version */
+.loading .speed-lines-bg { opacity: 0.3; }
+.loading .orb {
+  background: radial-gradient(circle at 30% 30%, var(--c-yellow), var(--c-red) 60%, var(--c-night) 110%);
+}
+.loading .orb::after {
+  content: "DRAWING…";
+  font-family: var(--font-comic-title);
+  background: var(--ink);
+  color: var(--c-yellow);
+  padding: 3px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.08em;
+  font-size: 14px;
+}
+.loading h2 { font-family: var(--font-comic-title); }
+.loading p { font-family: var(--font-letter); font-size: 18px; }
+
+/* end screen */
+.end-card {
+  background: var(--bubble);
+  border-radius: 8px;
+  box-shadow: 8px 8px 0 var(--ink);
+}
+.end-card .ja-stamp {
+  font-family: var(--font-comic-title);
+  background: var(--c-red);
+  color: #fff;
+  border-radius: 999px;
+  letter-spacing: 0.08em;
+  -webkit-text-stroke: 0;
+}
+.end-card h2 { font-family: var(--font-comic-title); }
+.end-card .summary { font-family: var(--font-letter); font-size: 18px; line-height: 1.45; }
+.end-stat .num { font-family: var(--font-comic-title); }
+
+/* mini comic panels are no longer used — hide */
+.inline-panels { display: none; }
+
+/* sticker shelf */
+.sticker { font-family: var(--font-comic-title); }
+
+/* ja text — make it less manga-y, more readable */
+.ja { font-family: var(--font-letter); letter-spacing: 0.04em; }
+
+/* speech-bubble (legacy in SceneIllustration) — make comic */
+.speech-bubble {
+  background: var(--bubble) !important;
+  border: 3px solid var(--ink) !important;
+  border-radius: 18px / 22px !important;
+  font-family: var(--font-letter) !important;
+  font-size: 16px !important;
+  box-shadow: 2px 2px 0 var(--ink) !important;
+}
+
+/* Reader / setup hint text */
+.reader-foot .hint, .setup-hint, .sub {
+  font-family: var(--font-letter);
+  font-size: 16px;
+}
