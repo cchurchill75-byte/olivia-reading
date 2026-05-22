@@ -6,6 +6,15 @@ export const config = { maxDuration: 30 };
 
 const MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image';
 const STYLE_VERSION = 'v1';
+const EST_COST_PER_IMAGE = 0.04; // USD, rough
+
+// In-memory usage tally (per warm instance; resets on cold start).
+const usage = { generated: 0, cacheHits: 0 };
+function logUsage(kind: 'HIT' | 'MISS', characterId: string | undefined, ms: number) {
+  if (kind === 'HIT') usage.cacheHits++; else usage.generated++;
+  const est = (usage.generated * EST_COST_PER_IMAGE).toFixed(2);
+  console.log(`[illustrate] ${kind} char=${characterId || 'none'} ${ms}ms | generated=${usage.generated} cacheHits=${usage.cacheHits} ~$${est}`);
+}
 
 // Locked illustration style so every panel reads as the same children's comic.
 const STYLE =
@@ -67,13 +76,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .slice(0, 32);
   const pathname = `panels/${characterId || 'none'}/${STYLE_VERSION}-${hash}.png`;
   const haveBlob = !!process.env.BLOB_READ_WRITE_TOKEN;
+  const t0 = Date.now();
 
   try {
     // 1) Cache hit?
     if (haveBlob) {
       const { blobs } = await list({ prefix: pathname, limit: 1 });
       const hit = blobs.find((b) => b.pathname === pathname);
-      if (hit) return res.status(200).json({ url: hit.url, cached: true });
+      if (hit) {
+        logUsage('HIT', characterId, Date.now() - t0);
+        return res.status(200).json({ url: hit.url, cached: true });
+      }
     }
 
     // 2) Build the request parts (text + optional reference image).
@@ -101,6 +114,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!img) return res.status(502).json({ error: 'no image returned from model' });
 
     // 4) Store (Blob) or return inline.
+    logUsage('MISS', characterId, Date.now() - t0);
     if (haveBlob) {
       const buffer = Buffer.from(img.b64, 'base64');
       const { url } = await put(pathname, buffer, {

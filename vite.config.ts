@@ -11,6 +11,7 @@ import { join } from 'node:path'
 
 const CLAUDE_MODEL = 'claude-haiku-4-5'
 const IMAGE_MODEL = 'gemini-2.5-flash-image'
+let devImagesGenerated = 0
 
 const STYLE =
   "Bright, friendly children's storybook comic-panel illustration. Bold clean " +
@@ -88,6 +89,8 @@ function devApi() {
             const found = (gj?.candidates?.[0]?.content?.parts || []).find((p) => (p.inlineData || p.inline_data)?.data)
             const inline = found && (found.inlineData || found.inline_data)
             if (!inline?.data) return send(502, { error: 'no image returned' })
+            devImagesGenerated++
+            console.log(`[illustrate] MISS char=${characterId || 'none'} | generated=${devImagesGenerated} ~$${(devImagesGenerated * 0.04).toFixed(2)}`)
             return send(200, { url: `data:${inline.mimeType || inline.mime_type || 'image/png'};base64,${inline.data}` })
           }
           return next()

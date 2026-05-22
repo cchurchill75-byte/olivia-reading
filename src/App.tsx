@@ -214,6 +214,12 @@ export default function App() {
     };
   };
 
+  // Hard character canon Claude must respect in the prose (keeps Rocky faceless, etc.).
+  const CHARACTER_CANON: Record<string, string> = {
+    rocky: 'Rocky is faceless and eyeless — NEVER describe his eyes, face, or facial expressions. He communicates only in musical chimes, clicks, and beeps (like "♪ click-CLICK ♪"), never in human words.',
+  };
+  const characterCanon = () => (characterId && CHARACTER_CANON[characterId]) || '';
+
   const difficultyPipForChapter = (idx: number) => {
     const baseMap: Record<string, number> = { grade_2: 1, grade_3: 2, grade_4: 3, grade_5: 4 };
     const base = baseMap[settings.baseDifficulty] || 3;
@@ -255,8 +261,10 @@ export default function App() {
     if (!characterSupportsIllustration(characterId)) return chapter;
     const panels = chapter.panels || [];
     if (!panels.some((p) => p.imagePrompt)) return chapter;
+    const setting = buildContext().setting;
+    const suffix = setting ? ` The scene is set in ${setting}.` : '';
     const urls = await Promise.all(
-      panels.map((p) => (p.imagePrompt ? illustratePanel(characterId, p.imagePrompt) : Promise.resolve(null))),
+      panels.map((p) => (p.imagePrompt ? illustratePanel(characterId, p.imagePrompt + suffix) : Promise.resolve(null))),
     );
     return { ...chapter, panels: panels.map((p, i) => (urls[i] ? { ...p, imageUrl: urls[i] as string } : p)) };
   };
@@ -269,7 +277,7 @@ export default function App() {
     const prompt = `Write CHAPTER 1 of a ${settings.chaptersPerStory}-chapter comic-book-style story.
 
 CHARACTER: ${ctx.character?.name} — ${ctx.character?.tagline}
-SETTING (where it begins): ${ctx.setting}
+${characterCanon() ? `CHARACTER CANON (must respect): ${characterCanon()}\n` : ''}SETTING (where it begins): ${ctx.setting}
 PROBLEM TO SOLVE: ${ctx.problem}
 HELPFUL ITEM: ${ctx.item}
 TONE: ${ctx.mood}
@@ -321,7 +329,7 @@ Chapter 1 must:
     const prompt = `Continue the story. This is CHAPTER ${idx + 1} of ${settings.chaptersPerStory}.
 
 CHARACTER: ${ctx.character?.name}
-SETTING start: ${ctx.setting}
+${characterCanon() ? `CHARACTER CANON (must respect): ${characterCanon()}\n` : ''}SETTING start: ${ctx.setting}
 PROBLEM: ${ctx.problem}
 ITEM: ${ctx.item}
 TONE: ${ctx.mood}
