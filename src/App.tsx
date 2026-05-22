@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import type { Chapter, Character, Choice, Settings, SessionStats, SetupQuestion, Stage } from './types';
 import { claudeComplete } from './lib/claude';
+import { illustratePanel, characterSupportsIllustration } from './lib/illustrate';
 import { levelFromXp, xpProgress } from './state/rewards';
 import { loadInt, loadJson, saveInt, saveJson } from './state/persist';
 import { getSessionSetupQuestions } from './data/setupQuestions';
@@ -247,6 +248,23 @@ export default function App() {
     }
   };
 
+  // Generate illustrated panel images for a chapter, updating state as each
+  // arrives so the Reader can swap placeholders for art progressively.
+  const generatePanelImages = async (chapterIdx: number, chapter: Chapter) => {
+    if (!characterSupportsIllustration(characterId)) return;
+    const panels = chapter.panels || [];
+    for (let i = 0; i < panels.length; i++) {
+      const p = panels[i];
+      if (!p.imagePrompt || p.imageUrl) continue;
+      const url = await illustratePanel(characterId, p.imagePrompt);
+      if (!url) continue;
+      setChapters((cs) => cs.map((c, ci) => (ci !== chapterIdx ? c : {
+        ...c,
+        panels: (c.panels || []).map((pp, pi) => (pi !== i ? pp : { ...pp, imageUrl: url })),
+      })));
+    }
+  };
+
   const generateFirstChapter = async () => {
     setStage('loading');
     setLoadingMsg(`Drawing the first panel of ${allCharacters.find((c) => c.id === characterId)?.name}'s manga…`);
@@ -268,14 +286,16 @@ Chapter 1 must:
 - End on a choice — what to do next.
 - Include glossary entries for any "stretch" vocabulary words you use.
 - Include 1 comprehension question (3 options, 1 correct).
-- Provide exactly 2 distinct next-step choices.`;
+- Provide exactly 2 distinct next-step choices.
+- Provide a "panels" array of EXACTLY 3 storyboard panels for this chapter's key visual beats. Each imagePrompt is ONE concrete sentence an illustrator can draw — name the character, the action, and the place; do not put any words or text in the image.`;
 
     const schema = `{
   "title": "short chapter title (3-6 words)",
   "text": "the prose, 3-4 short paragraphs separated by \\n\\n",
   "glossary": [{"word":"...","syll":"syl • la • bles","def":"kid-friendly definition"}],
   "quiz": {"q":"...","options":["A","B","C"],"correct":0,"explain":"one-sentence why"},
-  "choices": [{"label":"...","value":"short_tag"},{"label":"...","value":"short_tag"}]
+  "choices": [{"label":"...","value":"short_tag"},{"label":"...","value":"short_tag"}],
+  "panels": [{"caption":"<=6 word caption or empty","dialogue":"short hero speech bubble or empty","imagePrompt":"one vivid sentence: character + action + place"}]
 }`;
 
     const ch = await callClaude(prompt, schema);
@@ -289,6 +309,7 @@ Chapter 1 must:
     }));
     grantXp(5);
     setStage('reader');
+    void generatePanelImages(0, final);
   };
 
   const generateNextChapter = async (choiceMade: Choice) => {
@@ -319,14 +340,16 @@ ${isFinal
       ? 'This is the FINAL chapter. Resolve the problem in a satisfying, hopeful way. The "choices" array MUST be empty [].'
       : 'Advance the adventure. End on a new choice point.'}
 
-Include glossary entries for any rich vocabulary, and 1 comprehension question.`;
+Include glossary entries for any rich vocabulary, and 1 comprehension question.
+Provide a "panels" array of EXACTLY 3 storyboard panels for this chapter's key visual beats; each imagePrompt is ONE concrete sentence an illustrator can draw (name the character, action, place; no words/text in the image).`;
 
     const schema = `{
   "title": "chapter title",
   "text": "3-4 paragraphs, separated by \\n\\n",
   "glossary": [{"word":"...","syll":"...","def":"..."}],
   "quiz": {"q":"...","options":["A","B","C"],"correct":0,"explain":"..."},
-  "choices": ${isFinal ? '[]' : '[{"label":"...","value":"..."},{"label":"...","value":"..."}]'}
+  "choices": ${isFinal ? '[]' : '[{"label":"...","value":"..."},{"label":"...","value":"..."}]'},
+  "panels": [{"caption":"<=6 word caption or empty","dialogue":"short hero speech bubble or empty","imagePrompt":"one vivid sentence: character + action + place"}]
 }`;
 
     const ch = await callClaude(prompt, schema);
@@ -341,6 +364,7 @@ Include glossary entries for any rich vocabulary, and 1 comprehension question.`
     grantXp(10);
     grantAchievement('path-walker', '🛤️', 'ACHIEVEMENT', 'Path Walker');
     setStage('reader');
+    void generatePanelImages(idx, final);
   };
 
   /* ---------- reader callbacks ---------- */

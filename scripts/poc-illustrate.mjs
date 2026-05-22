@@ -29,19 +29,25 @@ const STYLE =
   'outlines, flat cel shading, warm palette, soft lighting. Single panel, no text, ' +
   'no words, no speech bubbles, no captions, no signature.';
 
-// Movie-accurate-but-kid-friendly Rocky (Project Hail Mary Eridian).
+// Movie-accurate Rocky (Project Hail Mary Eridian). The attached reference
+// image is the source of truth for his anatomy; the text reinforces it.
 const ROCKY =
-  'Rocky, a gentle alien from a kids\' comic: a faceless, eyeless rock creature ' +
-  'about the size of a big dog. Domed faceted stone carapace in grey and warm ' +
-  'brown tones, five articulated stone legs, each leg ending in three triangular ' +
-  'stone fingers, small carved markings on his shell. He has no face and no eyes.';
+  'Rocky is a gentle alien made of living stone, drawn EXACTLY like the attached ' +
+  'reference image. Anatomy that must be preserved: a single domed faceted rock ' +
+  'carapace shell on top, and EXACTLY FIVE straight jointed stone legs radiating ' +
+  'out from under the shell, each leg ending in three small triangular stone ' +
+  'fingers. He has NO head, NO neck, NO eyes, NO face, NO mouth, and is NOT a ' +
+  'turtle or tortoise — just the faceted rock shell and five legs, grey and warm ' +
+  'brown stone, with faint carved chevron markings on the shell. He is about the ' +
+  'size of a big dog.';
 
 const PANELS = [
   {
     name: '01-cave',
     prompt: `${ROCKY} Scene: Rocky stands on the glowing floor of a crystal cave, ` +
-      `curiously reaching one front leg toward a floating glowing mineral. Same ` +
-      `character design as the reference image. ${STYLE}`,
+      `curiously reaching one front leg toward a floating glowing mineral. Keep his ` +
+      `anatomy identical to the reference image: faceless, eyeless, exactly five ` +
+      `legs, faceted rock shell. ${STYLE}`,
   },
   {
     name: '02-desert',
@@ -52,8 +58,9 @@ const PANELS = [
   {
     name: '03-friend',
     prompt: `${ROCKY} Scene: Rocky stands beside a friendly young human child in a ` +
-      `spacesuit; together they look up at a glowing star-map hologram. Same ` +
-      `character design as the reference image. ${STYLE}`,
+      `spacesuit; together they look up at a glowing star-map hologram. Keep his ` +
+      `anatomy identical to the reference image: faceless, eyeless, exactly five ` +
+      `legs, faceted rock shell. ${STYLE}`,
   },
 ];
 
@@ -111,20 +118,29 @@ async function main() {
 
   console.log(`Model: ${MODEL}\nOutput: ${OUT}\n`);
 
-  // 1) Reference sheet (text -> image)
-  console.log('Generating Rocky reference sheet…');
-  const ref = await generate({
-    prompt: `Character reference sheet, full body, centered, plain neutral ` +
-      `background. ${ROCKY} ${STYLE}`,
-  });
-  await writeFile(join(OUT, '00-reference.png'), Buffer.from(ref.b64, 'base64'));
-  console.log(`  saved 00-reference.png  (${ref.ms}ms)\n`);
+  // 1) Reference: prefer our actual SVG-rendered Rocky (rocky-ref.png) so the
+  //    model copies the real design; fall back to a text-generated sheet.
+  let refB64;
+  const refPath = join(OUT, 'rocky-ref.png');
+  if (existsSync(refPath)) {
+    refB64 = (await readFile(refPath)).toString('base64');
+    console.log('Using reference: rocky-ref.png (our actual SVG Rocky)\n');
+  } else {
+    console.log('Generating Rocky reference sheet…');
+    const ref = await generate({
+      prompt: `Character reference sheet, full body, centered, plain neutral ` +
+        `background. ${ROCKY} ${STYLE}`,
+    });
+    await writeFile(join(OUT, '00-reference.png'), Buffer.from(ref.b64, 'base64'));
+    refB64 = ref.b64;
+    console.log(`  saved 00-reference.png  (${ref.ms}ms)\n`);
+  }
 
   // 2) Panels (reference image + text -> image)
-  let total = ref.ms;
+  let total = 0;
   for (const panel of PANELS) {
     console.log(`Generating panel ${panel.name}…`);
-    const out = await generate({ prompt: panel.prompt, refB64: ref.b64 });
+    const out = await generate({ prompt: panel.prompt, refB64 });
     await writeFile(join(OUT, `${panel.name}.png`), Buffer.from(out.b64, 'base64'));
     total += out.ms;
     console.log(`  saved ${panel.name}.png  (${out.ms}ms)`);

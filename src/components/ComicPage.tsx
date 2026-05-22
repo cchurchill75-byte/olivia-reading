@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
-import type { Chapter } from '../types';
+import type { Chapter, ChapterPanel } from '../types';
 import { RockyArt, MaineCoonArt, MangaDefs, getAllCharacters } from '../data/characters';
 import { CustomHeroArt } from '../data/heroData';
+import { characterSupportsIllustration } from '../lib/illustrate';
 
 const SETTING_BG: Record<string, string> = {
   asteroid_field: 'bg-7', crystal_caves: 'bg-6', nebula_garden: 'bg-5',
@@ -27,16 +28,42 @@ interface PanelSpec {
 export default function ComicPage({ chapter, characterId, setting, chapterIdx, totalChapters }: {
   chapter: Chapter; characterId: string; setting: string; chapterIdx: number; totalChapters: number;
 }) {
+  // Always call hooks in the same order regardless of render path.
   const panels = useMemo(
     () => buildPanelPlan(chapter, characterId, setting, chapterIdx, totalChapters),
     [chapter, characterId, setting, chapterIdx, totalChapters],
   );
-  const layoutCls = panels.length <= 4 ? 'comic-4' : panels.length === 5 ? 'comic-5' : 'comic-6';
 
+  // Illustrated path: characters with a reference image get AI-drawn panels.
+  const illPanels = (chapter.panels || []).filter((p) => p.imagePrompt);
+  if (characterSupportsIllustration(characterId) && illPanels.length > 0) {
+    return <IllustratedComic panels={illPanels} />;
+  }
+
+  const layoutCls = panels.length <= 4 ? 'comic-4' : panels.length === 5 ? 'comic-5' : 'comic-6';
   return (
     <div className={`manga-panels ${layoutCls}`}>
       {panels.map((p, i) => (
         <ComicPanel key={i} spec={p} characterId={characterId} setting={setting} />
+      ))}
+    </div>
+  );
+}
+
+/* ---- Illustrated comic (AI-generated panels) ---- */
+function IllustratedComic({ panels }: { panels: ChapterPanel[] }) {
+  const cls = panels.length <= 2 ? 'comic-ill-2' : 'comic-ill-3';
+  return (
+    <div className={`manga-panels ${cls}`}>
+      {panels.map((p, i) => (
+        <div key={i} className="manga-panel ill">
+          {p.imageUrl
+            ? <img className="ill-img" src={p.imageUrl} alt={p.caption || ''} />
+            : <div className="ill-loading"><span className="ill-dot"></span>drawing…</div>}
+          <div className="pn-halftone"></div>
+          {p.caption ? <div className="cm-caption">{p.caption}</div> : null}
+          {p.dialogue ? <PanelBubble bubble={{ text: p.dialogue }} /> : null}
+        </div>
       ))}
     </div>
   );

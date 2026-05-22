@@ -21,6 +21,10 @@ export interface ChapterPanel {
   caption?: string;
   bubble?: { text: string; style?: string; pos?: string } | null;
   sfx?: string | null;
+  // illustrated-panel pipeline
+  imagePrompt?: string;
+  dialogue?: string;
+  imageUrl?: string;
 }
 
 export interface Chapter {
