@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# POC: generated illustration output (local only)
+poc-output
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
