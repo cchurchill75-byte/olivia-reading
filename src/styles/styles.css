@@ -2156,6 +2156,12 @@ button, .btn, .tool-btn, .char-card, .setup-option, .choice-btn,
   .hb-grid { grid-template-columns: 320px 1fr; gap: 24px; }
 }
 
+/* === Wide viewports (desktop + large tablets, any orientation) ===
+   All hero tiles on a single row; smaller boxes. */
+@media (min-width: 1025px) {
+  .char-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+}
+
 /* Comfortable touch hit areas — minimums for everything tappable */
 @media (pointer: coarse) {
   .btn { min-height: 52px; padding: 14px 24px; }
