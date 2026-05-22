@@ -248,21 +248,17 @@ export default function App() {
     }
   };
 
-  // Generate illustrated panel images for a chapter, updating state as each
-  // arrives so the Reader can swap placeholders for art progressively.
-  const generatePanelImages = async (chapterIdx: number, chapter: Chapter) => {
-    if (!characterSupportsIllustration(characterId)) return;
+  // Generate a chapter's panel illustrations IN PARALLEL and return the chapter
+  // with image URLs attached. Awaited on the loading screen so the Reader opens
+  // with a finished comic instead of streaming spinners.
+  const illustrateChapter = async (chapter: Chapter): Promise<Chapter> => {
+    if (!characterSupportsIllustration(characterId)) return chapter;
     const panels = chapter.panels || [];
-    for (let i = 0; i < panels.length; i++) {
-      const p = panels[i];
-      if (!p.imagePrompt || p.imageUrl) continue;
-      const url = await illustratePanel(characterId, p.imagePrompt);
-      if (!url) continue;
-      setChapters((cs) => cs.map((c, ci) => (ci !== chapterIdx ? c : {
-        ...c,
-        panels: (c.panels || []).map((pp, pi) => (pi !== i ? pp : { ...pp, imageUrl: url })),
-      })));
-    }
+    if (!panels.some((p) => p.imagePrompt)) return chapter;
+    const urls = await Promise.all(
+      panels.map((p) => (p.imagePrompt ? illustratePanel(characterId, p.imagePrompt) : Promise.resolve(null))),
+    );
+    return { ...chapter, panels: panels.map((p, i) => (urls[i] ? { ...p, imageUrl: urls[i] as string } : p)) };
   };
 
   const generateFirstChapter = async () => {
@@ -300,16 +296,17 @@ Chapter 1 must:
 
     const ch = await callClaude(prompt, schema);
     const final = ch || fallbackChapter(1, ctx);
-    setChapters([final]);
+    setLoadingMsg('Inking the comic panels…');
+    const drawn = await illustrateChapter(final);
+    setChapters([drawn]);
     setCurrentChapterIdx(0);
     setStats((s) => ({
       ...s,
-      wordCount: s.wordCount + (final.text || '').split(/\s+/).length,
+      wordCount: s.wordCount + (drawn.text || '').split(/\s+/).length,
       quizTotal: s.quizTotal + 1,
     }));
     grantXp(5);
     setStage('reader');
-    void generatePanelImages(0, final);
   };
 
   const generateNextChapter = async (choiceMade: Choice) => {
@@ -354,17 +351,18 @@ Provide a "panels" array of EXACTLY 3 storyboard panels for this chapter's key v
 
     const ch = await callClaude(prompt, schema);
     const final = ch || fallbackChapter(idx + 1, ctx, isFinal);
-    setChapters((cs) => [...cs, final]);
+    setLoadingMsg('Inking the comic panels…');
+    const drawn = await illustrateChapter(final);
+    setChapters((cs) => [...cs, drawn]);
     setCurrentChapterIdx(idx);
     setStats((s) => ({
       ...s,
-      wordCount: s.wordCount + (final.text || '').split(/\s+/).length,
+      wordCount: s.wordCount + (drawn.text || '').split(/\s+/).length,
       quizTotal: s.quizTotal + 1,
     }));
     grantXp(10);
     grantAchievement('path-walker', '🛤️', 'ACHIEVEMENT', 'Path Walker');
     setStage('reader');
-    void generatePanelImages(idx, final);
   };
 
   /* ---------- reader callbacks ---------- */

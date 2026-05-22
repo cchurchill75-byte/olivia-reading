@@ -59,7 +59,7 @@ function IllustratedComic({ panels }: { panels: ChapterPanel[] }) {
         <div key={i} className="manga-panel ill">
           {p.imageUrl
             ? <img className="ill-img" src={p.imageUrl} alt={p.caption || ''} />
-            : <div className="ill-loading"><span className="ill-dot"></span>drawing…</div>}
+            : <div className="ill-blank"></div>}
           <div className="pn-halftone"></div>
           {p.caption ? <div className="cm-caption">{p.caption}</div> : null}
           {p.dialogue ? <PanelBubble bubble={{ text: p.dialogue }} /> : null}
