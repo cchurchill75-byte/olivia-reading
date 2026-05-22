@@ -1,6 +1,8 @@
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { readFileSync, existsSync } from 'node:fs'
+import { join } from 'node:path'
 
 /* Dev-only middleware so `npm run dev` serves the serverless API routes
    (/api/complete, /api/illustrate) locally, reading keys from .env.local.
@@ -97,11 +99,19 @@ function devApi() {
   }
 }
 
-// https://vite.dev/config/
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
-  for (const k of ['ANTHROPIC_API_KEY', 'GEMINI_API_KEY', 'GEMINI_IMAGE_MODEL']) {
-    if (env[k] && !process.env[k]) process.env[k] = env[k]
+// Read .env.local directly and OVERRIDE process.env for these keys. (The launching
+// shell may pre-set an empty ANTHROPIC_API_KEY, which dotenv/loadEnv won't override.)
+function loadLocalEnv() {
+  const file = join(process.cwd(), '.env.local')
+  if (!existsSync(file)) return
+  for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/)
+    if (m) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '')
   }
+}
+
+// https://vite.dev/config/
+export default defineConfig(() => {
+  loadLocalEnv()
   return { plugins: [react(), devApi()] }
 })
