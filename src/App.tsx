@@ -218,7 +218,7 @@ export default function App() {
   const CHARACTER_CANON: Record<string, string> = {
     rocky: 'Rocky is faceless and eyeless — NEVER describe his eyes, face, or facial expressions. He communicates only in musical chimes, clicks, and beeps (like "♪ click-CLICK ♪"), never in human words. He travels the stars in his own cluttered workshop-spaceship — full of tools, beakers, and glowing screens — and often works in or returns to it.',
     bunniforous: 'Bunniforous is a plump, soft lop-eared bunny with extra-long floppy ears, fawn/tan fur and a white nose, chest, belly, and paws. She is a brave, sneaky, mischievous space-captain pilot with a playful, up-to-something streak.',
-    mainecoon: 'Sir Biscuit is an ENORMOUS gentle-giant Maine Coon cat — about half the height of a person, the size of a small lion. Big fluffy brown tabby with lynx-tufted ears, a thick cream ruff, cream chest and belly, and a long fluffy ringed tail. Always show how huge he is. Warm, regal, and kind.',
+    mainecoon: 'Biscuits is an ENORMOUS gentle-giant Maine Coon cat — about half the height of a person, the size of a small lion. Big fluffy brown tabby with lynx-tufted ears, a thick cream ruff, cream chest and belly, and a long fluffy ringed tail. Always show how huge he is. Warm, regal, and kind.',
   };
   const characterCanon = () => (characterId && CHARACTER_CANON[characterId]) || '';
 

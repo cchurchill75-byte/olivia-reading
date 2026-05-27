@@ -367,8 +367,8 @@ export const CHARACTERS: Character[] = [
   },
   {
     id: 'mainecoon',
-    name: 'Sir Biscuit',
-    pronounce: '/ bis-kit / \u00B7 Maine Coon',
+    name: 'Biscuits',
+    pronounce: '/ bis-kits / \u00B7 Maine Coon',
     tagline: 'A gentle giant of a cat — the size of a small lion and twice as snuggly. Fluffy mane, lynx-tufted ears, and a tail like a feather boa. He purrs in three octaves.',
     traits: ['Gigantic', 'Gentle', 'Fluffy', 'Purrs'],
     art: 'mainecoon',

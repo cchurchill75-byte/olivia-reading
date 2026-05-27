@@ -12,7 +12,7 @@ const SETTING_BG: Record<string, string> = {
 };
 
 const CHAR_NAMES: Record<string, string> = {
-  rocky: 'Rocky', mainecoon: 'Sir Biscuit', bunniforous: 'Bunniforous',
+  rocky: 'Rocky', mainecoon: 'Biscuits', bunniforous: 'Bunniforous',
 };
 
 interface PanelSpec {
