@@ -217,6 +217,7 @@ export default function App() {
   // Hard character canon Claude must respect in the prose (keeps Rocky faceless, etc.).
   const CHARACTER_CANON: Record<string, string> = {
     rocky: 'Rocky is faceless and eyeless — NEVER describe his eyes, face, or facial expressions. He communicates only in musical chimes, clicks, and beeps (like "♪ click-CLICK ♪"), never in human words. He travels the stars in his own cluttered workshop-spaceship — full of tools, beakers, and glowing screens — and often works in or returns to it.',
+    bunniforous: 'Bunniforous is a plump, soft lop-eared bunny with extra-long floppy ears, fawn/tan fur and a white nose, chest, belly, and paws. She is a brave, sneaky, mischievous space-captain pilot with a playful, up-to-something streak.',
   };
   const characterCanon = () => (characterId && CHARACTER_CANON[characterId]) || '';
 

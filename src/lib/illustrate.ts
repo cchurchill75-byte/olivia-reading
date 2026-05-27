@@ -4,8 +4,8 @@
 
 const REFERENCES: Record<string, string> = {
   rocky: '/refs/rocky.png',
+  bunniforous: '/refs/bunniforous.png',
   // mainecoon: '/refs/mainecoon.png',  // add as references are created
-  // bunniforous: '/refs/bunniforous.png',
 };
 
 export function characterSupportsIllustration(id?: string | null): boolean {
