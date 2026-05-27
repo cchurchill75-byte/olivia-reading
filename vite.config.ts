@@ -64,6 +64,10 @@ function devApi() {
             if (!r.ok) return send(r.status, { error: JSON.stringify(data).slice(0, 400) })
             return send(200, { text: data?.content?.[0]?.text ?? '' })
           }
+          if (url === '/api/usage') {
+            // Usage is tracked via the Vercel Blob store (production only).
+            return send(200, { rate: 0.04, totalCount: 0, totalCost: 0, days: [], note: 'Local dev: image spend is tracked on production.' })
+          }
           if (url === '/api/illustrate') {
             const key = process.env.GEMINI_API_KEY
             if (!key) return send(500, { error: 'GEMINI_API_KEY not set' })

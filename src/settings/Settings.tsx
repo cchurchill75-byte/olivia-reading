@@ -1,4 +1,68 @@
+import { useEffect, useState } from 'react';
 import type { Settings as SettingsType } from '../types';
+
+interface UsageData {
+  rate: number;
+  totalCount: number;
+  totalCost: number;
+  days: { date: string; count: number; cost: number }[];
+  note?: string;
+}
+
+function fmtDay(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+/** Nano Banana image-generation spend, broken out per day (from the Blob cache). */
+function UsagePanel() {
+  const [data, setData] = useState<UsageData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
+
+  const load = () => {
+    setLoading(true);
+    setErr(null);
+    fetch('/api/usage', { method: 'POST' })
+      .then((r) => r.json())
+      .then((d) => { if (d.error) setErr(String(d.error)); else setData(d as UsageData); })
+      .catch(() => setErr('Could not reach the usage service.'))
+      .finally(() => setLoading(false));
+  };
+  useEffect(() => { load(); }, []);
+
+  if (loading) return <div className="opt-sub">Loading spend…</div>;
+  if (err) return <div className="opt-sub">Couldn’t load spend: {err}</div>;
+  if (!data) return null;
+
+  const max = Math.max(0.01, ...data.days.map((d) => d.cost));
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 26 }}>${data.totalCost.toFixed(2)}</span>
+        <span className="opt-sub">{data.totalCount} images · ~${data.rate.toFixed(2)} each</span>
+      </div>
+      {data.note ? <div className="opt-sub">{data.note}</div> : null}
+      {!data.note && data.days.length === 0 ? <div className="opt-sub">No images generated yet.</div> : null}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {data.days.map((d) => (
+          <div key={d.date} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ width: 60, fontSize: 13 }}>{fmtDay(d.date)}</span>
+            <div style={{ flex: 1, background: 'var(--paper-warm)', border: '2px solid var(--ink)', borderRadius: 6, height: 18, overflow: 'hidden' }}>
+              <div style={{ width: `${Math.max(6, (d.cost / max) * 100)}%`, height: '100%', background: 'var(--accent)' }}></div>
+            </div>
+            <span style={{ width: 56, textAlign: 'right', fontWeight: 600 }}>${d.cost.toFixed(2)}</span>
+            <span style={{ width: 58, textAlign: 'right', fontSize: 12, color: 'var(--ink-soft)' }}>{d.count} img</span>
+          </div>
+        ))}
+      </div>
+      <div className="opt-sub" style={{ marginTop: 10 }}>
+        Estimate at ~${data.rate.toFixed(2)}/image. Re-reading a story is free (cached).
+      </div>
+      <button className="btn ghost" style={{ marginTop: 10 }} onClick={load}>↻ Refresh</button>
+    </div>
+  );
+}
 
 interface SettingsPageProps {
   settings: SettingsType;
@@ -113,6 +177,12 @@ export default function SettingsPage({ settings, onChange, onBack }: SettingsPag
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Nano Banana image spend */}
+        <div className="hb-section" style={{ marginTop: 22 }}>
+          <label className="hb-label">★ Image Spend (Nano Banana)</label>
+          <UsagePanel />
         </div>
       </div>
     </div>
