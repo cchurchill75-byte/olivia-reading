@@ -68,17 +68,22 @@ function devApi() {
             const key = process.env.GEMINI_API_KEY
             if (!key) return send(500, { error: 'GEMINI_API_KEY not set' })
             const characterId = body.characterId as string | undefined
-            const anatomy = (characterId && ANATOMY[characterId]) || ''
-            const fullPrompt = `${anatomy} Scene: ${body.prompt as string}. Keep the character's anatomy identical to the reference image. ${STYLE}`
-            const parts: unknown[] = [{ text: fullPrompt }]
             const referenceUrl = body.referenceUrl as string | undefined
-            if (referenceUrl) {
-              const rr = await fetch(referenceUrl)
-              if (rr.ok) {
-                const buf = Buffer.from(await rr.arrayBuffer())
-                parts.push({ inlineData: { mimeType: rr.headers.get('content-type') || 'image/png', data: buf.toString('base64') } })
-              }
+            const sceneRefUrl = body.sceneRefUrl as string | undefined
+            const anatomy = (characterId && ANATOMY[characterId]) || ''
+            const refNote = referenceUrl && sceneRefUrl
+              ? ' Keep the character identical to the FIRST reference image; match the spaceship/workshop interior to the SECOND reference image.'
+              : referenceUrl ? " Keep the character's anatomy identical to the reference image." : ''
+            const fullPrompt = `${anatomy} Scene: ${body.prompt as string}.${refNote} ${STYLE}`
+            const parts: unknown[] = [{ text: fullPrompt }]
+            const pushRef = async (u: string) => {
+              const rr = await fetch(u)
+              if (!rr.ok) return
+              const buf = Buffer.from(await rr.arrayBuffer())
+              parts.push({ inlineData: { mimeType: rr.headers.get('content-type') || 'image/png', data: buf.toString('base64') } })
             }
+            if (referenceUrl) await pushRef(referenceUrl)
+            if (sceneRefUrl) await pushRef(sceneRefUrl)
             const gr = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent`, {
               method: 'POST',
               headers: { 'content-type': 'application/json', 'x-goog-api-key': key },

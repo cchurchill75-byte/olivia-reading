@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import type { Chapter, Character, Choice, Settings, SessionStats, SetupQuestion, Stage } from './types';
 import { claudeComplete } from './lib/claude';
-import { illustratePanel, characterSupportsIllustration } from './lib/illustrate';
+import { illustratePanel, characterSupportsIllustration, shipSceneRef } from './lib/illustrate';
 import { levelFromXp, xpProgress } from './state/rewards';
 import { loadInt, loadJson, saveInt, saveJson } from './state/persist';
 import { getSessionSetupQuestions } from './data/setupQuestions';
@@ -216,7 +216,7 @@ export default function App() {
 
   // Hard character canon Claude must respect in the prose (keeps Rocky faceless, etc.).
   const CHARACTER_CANON: Record<string, string> = {
-    rocky: 'Rocky is faceless and eyeless — NEVER describe his eyes, face, or facial expressions. He communicates only in musical chimes, clicks, and beeps (like "♪ click-CLICK ♪"), never in human words.',
+    rocky: 'Rocky is faceless and eyeless — NEVER describe his eyes, face, or facial expressions. He communicates only in musical chimes, clicks, and beeps (like "♪ click-CLICK ♪"), never in human words. He travels the stars in his own cluttered workshop-spaceship — full of tools, beakers, and glowing screens — and often works in or returns to it.',
   };
   const characterCanon = () => (characterId && CHARACTER_CANON[characterId]) || '';
 
@@ -264,7 +264,9 @@ export default function App() {
     const setting = buildContext().setting;
     const suffix = setting ? ` The scene is set in ${setting}.` : '';
     const urls = await Promise.all(
-      panels.map((p) => (p.imagePrompt ? illustratePanel(characterId, p.imagePrompt + suffix) : Promise.resolve(null))),
+      panels.map((p) => (p.imagePrompt
+        ? illustratePanel(characterId, p.imagePrompt + suffix, shipSceneRef(characterId, p.imagePrompt, setting))
+        : Promise.resolve(null))),
     );
     return { ...chapter, panels: panels.map((p, i) => (urls[i] ? { ...p, imageUrl: urls[i] as string } : p)) };
   };

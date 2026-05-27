@@ -58,20 +58,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY not set' });
 
-  const { characterId, referenceUrl, prompt } = (req.body ?? {}) as {
+  const { characterId, referenceUrl, sceneRefUrl, prompt } = (req.body ?? {}) as {
     characterId?: string;
     referenceUrl?: string;
+    sceneRefUrl?: string;
     prompt?: string;
   };
   if (!prompt) return res.status(400).json({ error: 'prompt required' });
 
   const anatomy = (characterId && ANATOMY[characterId]) || '';
-  const fullPrompt = `${anatomy} Scene: ${prompt}. Keep the character's anatomy ` +
-    `identical to the reference image. ${STYLE}`;
+  const refNote = referenceUrl && sceneRefUrl
+    ? ' Keep the character identical to the FIRST reference image; match the spaceship/workshop interior to the SECOND reference image.'
+    : referenceUrl
+      ? " Keep the character's anatomy identical to the reference image."
+      : '';
+  const fullPrompt = `${anatomy} Scene: ${prompt}.${refNote} ${STYLE}`;
 
-  // Cache key: same character + style + prompt => same image.
+  // Cache key: same character + scene + style + prompt => same image.
   const hash = createHash('sha256')
-    .update(`${characterId || 'none'}|${STYLE_VERSION}|${MODEL}|${fullPrompt}`)
+    .update(`${characterId || 'none'}|${sceneRefUrl || ''}|${STYLE_VERSION}|${MODEL}|${fullPrompt}`)
     .digest('hex')
     .slice(0, 32);
   const pathname = `panels/${characterId || 'none'}/${STYLE_VERSION}-${hash}.png`;
@@ -89,16 +94,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // 2) Build the request parts (text + optional reference image).
+    // 2) Build the request parts (text + character ref + optional scene ref).
     const parts: unknown[] = [{ text: fullPrompt }];
-    if (referenceUrl) {
-      const refRes = await fetch(referenceUrl);
-      if (refRes.ok) {
-        const buf = Buffer.from(await refRes.arrayBuffer());
-        const mime = refRes.headers.get('content-type') || 'image/png';
-        parts.push({ inlineData: { mimeType: mime, data: buf.toString('base64') } });
-      }
-    }
+    const pushRef = async (url: string) => {
+      const r = await fetch(url);
+      if (!r.ok) return;
+      const buf = Buffer.from(await r.arrayBuffer());
+      parts.push({ inlineData: { mimeType: r.headers.get('content-type') || 'image/png', data: buf.toString('base64') } });
+    };
+    if (referenceUrl) await pushRef(referenceUrl);
+    if (sceneRefUrl) await pushRef(sceneRefUrl);
 
     // 3) Generate.
     const gen = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
