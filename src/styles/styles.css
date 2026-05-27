@@ -22,10 +22,10 @@
   --bad: #d3263c;
 
   --font-body: "Lexend", system-ui, sans-serif;
-  --font-display: "Bowlby One", "Bangers", "Impact", sans-serif;
-  --font-action: "Bangers", "Impact", sans-serif;
-  --font-hand: "Caveat Brush", "Caveat", cursive;
-  --font-jp: "Zen Kurenaido", "Yusei Magic", sans-serif;
+  --font-display: "Fredoka", "Lexend", system-ui, sans-serif;
+  --font-action: "Fredoka", "Lexend", system-ui, sans-serif;
+  --font-hand: "Caveat", cursive;
+  --font-jp: "Fredoka", "Lexend", sans-serif;
 
   --reader-size: 22px;
   --reader-line: 1.7;
@@ -58,15 +58,7 @@ body.font-dys { --font-body: "Atkinson Hyperlegible", system-ui, sans-serif; }
     radial-gradient(circle at 20% 80%, rgba(255,176,46,0.08), transparent 50%),
     var(--paper);
 }
-#starfield::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle at center, rgba(12,10,20,0.16) 0.8px, transparent 1px);
-  background-size: 6px 6px;
-  opacity: 0.5;
-  mix-blend-mode: multiply;
-}
+/* (manga halftone dot overlay removed for a cleaner reader look) */
 #starfield::after {
   /* subtle paper noise */
   content: "";
@@ -141,9 +133,7 @@ button { font: inherit; cursor: pointer; }
   border-radius: 12px;
   display: grid; place-items: center;
   box-shadow: 4px 4px 0 var(--ink);
-  font-family: var(--font-jp);
   font-size: 26px;
-  transform: rotate(-4deg);
 }
 .brand .logo::after {
   content: "";
@@ -156,7 +146,8 @@ button { font: inherit; cursor: pointer; }
 .brand .accent { color: var(--accent); }
 .brand .ja {
   display: block;
-  font-family: var(--font-jp);
+  font-family: var(--font-body);
+  font-weight: 600;
   font-size: 11px;
   letter-spacing: 0.2em;
   color: var(--ink-soft);
@@ -381,8 +372,8 @@ button { font: inherit; cursor: pointer; }
   gap: 14px;
   transition: transform .12s, box-shadow .12s;
 }
-.char-card:nth-child(odd) { transform: rotate(-0.8deg); }
-.char-card:nth-child(even) { transform: rotate(0.8deg); }
+.char-card:nth-child(odd) { transform: none; }
+.char-card:nth-child(even) { transform: none; }
 .char-card:hover { transform: rotate(0) translate(-2px,-2px); box-shadow: 12px 12px 0 var(--ink); }
 .char-card.selected {
   background: var(--accent-2);
@@ -2007,7 +1998,7 @@ button { font: inherit; cursor: pointer; }
 .char-card.create-tile {
   background: var(--paper-warm);
   border-style: dashed;
-  transform: rotate(0.5deg);
+  transform: none;
 }
 .char-card.create-tile:hover { background: var(--accent-2); transform: rotate(0) translate(-2px,-2px); }
 .create-portrait {

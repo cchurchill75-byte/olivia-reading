@@ -62,7 +62,6 @@ function IllustratedComic({ panels }: { panels: ChapterPanel[] }) {
           {p.imageUrl
             ? <img className="ill-img" src={p.imageUrl} alt={p.caption || ''} />
             : <div className="ill-blank"></div>}
-          <div className="pn-halftone"></div>
           {p.caption ? <div className="cm-caption">{p.caption}</div> : null}
           {p.dialogue ? <PanelBubble bubble={{ text: p.dialogue }} /> : null}
         </div>
@@ -154,10 +153,8 @@ function ComicPanel({ spec, characterId, setting }: { spec: PanelSpec; character
   return (
     <div className={`manga-panel ${spec.bg || 'bg-1'}`}>
       <PanelScene scene={spec.scene} characterId={characterId} setting={setting} cover={spec.cover} />
-      <div className="pn-halftone"></div>
       {spec.caption ? <div className={`cm-caption ${spec.cover ? 'br' : ''}`}>{spec.caption}</div> : null}
       {spec.bubble ? <PanelBubble bubble={spec.bubble} /> : null}
-      {spec.sfx ? <PanelSfx text={spec.sfx} /> : null}
     </div>
   );
 }
@@ -176,14 +173,6 @@ function PanelBubble({ bubble }: { bubble: { text: string; style?: string; pos?:
     return <div className={cls} onClick={speak} role="button" aria-label={bubble.text}><span className="yell-bg">{bubble.text}</span></div>;
   }
   return <div className={cls} onClick={speak} role="button" aria-label={bubble.text}><span className="tail"></span>{bubble.text}</div>;
-}
-
-function PanelSfx({ text }: { text: string }) {
-  const seed = text.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-  const xPct = 20 + (seed % 35);
-  const yPct = 30 + (seed % 40);
-  const rot = (seed % 2 === 0 ? -1 : 1) * (4 + (seed % 8));
-  return <div className="cm-sfx" style={{ left: xPct + '%', top: yPct + '%', transform: `rotate(${rot}deg)` }}>{text}</div>;
 }
 
 /* ---- Panel Scenes ---- */

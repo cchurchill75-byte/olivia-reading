@@ -23,8 +23,7 @@ export default function Welcome({ onStart }: WelcomeProps) {
         </div>
       </div>
       <div className="hero-visual">
-        <div className="panel tilt-r">
-          <div className="speed-lines"></div>
+        <div className="panel">
           <svg viewBox="0 0 400 400" style={{ width: '100%', height: '100%' }}>
             <defs>
               <pattern id="hwh" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
@@ -37,7 +36,6 @@ export default function Welcome({ onStart }: WelcomeProps) {
               </radialGradient>
             </defs>
             <circle cx="200" cy="220" r="120" fill="url(#welGlow)" stroke="#0c0a14" strokeWidth="5" />
-            <circle cx="200" cy="220" r="120" fill="url(#hwh)" opacity="0.22" />
             <path d="M120,200 Q170,220 280,200" stroke="#0c0a14" strokeWidth="3" fill="none" />
             <path d="M130,260 Q200,290 280,250" stroke="#0c0a14" strokeWidth="3" fill="none" />
             <circle cx="160" cy="180" r="8" fill="#0c0a14" />
@@ -60,8 +58,6 @@ export default function Welcome({ onStart }: WelcomeProps) {
             </g>
           </svg>
         </div>
-        <div className="sfx tl">BOOM!</div>
-        <div className="sfx br">ZWOOSH</div>
       </div>
     </div>
   );

@@ -552,7 +552,7 @@ Provide a "panels" array of EXACTLY 3 storyboard panels for this chapter's key v
       <div className="app">
         <div className="topbar">
           <div className="brand" onClick={() => setStage('welcome')}>
-            <div className="logo">読</div>
+            <div className="logo">📖</div>
             <div>
               Olivia's <span className="accent">Comics</span><br />
               <span className="ja">★ READING ADVENTURES</span>
