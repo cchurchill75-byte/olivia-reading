@@ -14,6 +14,15 @@ function fmtDay(iso: string): string {
   return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ border: '2px solid var(--ink)', borderRadius: 10, padding: '8px 10px', background: 'var(--paper)' }}>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, lineHeight: 1.1 }}>{value}</div>
+      <div className="opt-sub" style={{ fontSize: 11 }}>{label}</div>
+    </div>
+  );
+}
+
 /** Nano Banana image-generation spend, broken out per day (from the Blob cache). */
 function UsagePanel() {
   const [data, setData] = useState<UsageData | null>(null);
@@ -36,12 +45,17 @@ function UsagePanel() {
   if (!data) return null;
 
   const max = Math.max(0.01, ...data.days.map((d) => d.cost));
+  const ym = new Date().toISOString().slice(0, 7); // current month (UTC) YYYY-MM
+  const monthCost = data.days.filter((d) => d.date.slice(0, 7) === ym).reduce((s, d) => s + d.cost, 0);
+  const projected = data.days.length ? (data.totalCost / data.days.length) * 30 : 0;
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: 26 }}>${data.totalCost.toFixed(2)}</span>
-        <span className="opt-sub">{data.totalCount} images · ~${data.rate.toFixed(2)} each</span>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 10 }}>
+        <Stat label="All-time" value={`$${data.totalCost.toFixed(2)}`} />
+        <Stat label="This month" value={`$${monthCost.toFixed(2)}`} />
+        <Stat label="Est. / month" value={`~$${projected.toFixed(2)}`} />
       </div>
+      <div className="opt-sub" style={{ marginBottom: 10 }}>{data.totalCount} images · ~${data.rate.toFixed(2)} each</div>
       {data.note ? <div className="opt-sub">{data.note}</div> : null}
       {!data.note && data.days.length === 0 ? <div className="opt-sub">No images generated yet.</div> : null}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -57,7 +71,7 @@ function UsagePanel() {
         ))}
       </div>
       <div className="opt-sub" style={{ marginTop: 10 }}>
-        Estimate at ~${data.rate.toFixed(2)}/image. Re-reading a story is free (cached).
+        ~${data.rate.toFixed(2)}/image. “Est./month” = average spend on reading days × 30. Re-reading a story is free (cached).
       </div>
       <button className="btn ghost" style={{ marginTop: 10 }} onClick={load}>↻ Refresh</button>
     </div>
