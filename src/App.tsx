@@ -222,6 +222,14 @@ export default function App() {
   };
   const characterCanon = () => (characterId && CHARACTER_CANON[characterId]) || '';
 
+  // Per-character story direction — biases plots toward each hero's signature style.
+  const CHARACTER_THEME: Record<string, string> = {
+    rocky: "Lean into OUTER-SPACE ADVENTURE: exploring strange planets, asteroid fields, nebulae, and especially Rocky's rocky home planet ERID. Often bring in other ERIDIANS (Rocky's stone-creature species) — they share his faceless, five-legged faceted-rock build but come in different SIZES and COLORS (grey, rust, sandy, slate-blue, mossy-green stone). Tone: brave, gentle, full of wonder and discovery.",
+    bunniforous: 'Center stories on PLAYFUL MISCHIEF and making big silly MESSES — pranks, knocked-over things, sticky or colorful chaos she causes and then has to fix or escape from. Tone: funny, sneaky-but-good-hearted, light and giggly. Never mean.',
+    mainecoon: 'Make stories gentle DETECTIVE MYSTERIES: something goes missing or a small puzzle appears, and Biscuits the giant cat detective gathers clues, follows a trail, and cracks the case with a satisfying reveal. Tone: clever, calm, cozy-mystery — always kid-friendly and never scary.',
+  };
+  const characterTheme = () => (characterId && CHARACTER_THEME[characterId]) || '';
+
   const difficultyPipForChapter = (idx: number) => {
     const baseMap: Record<string, number> = { grade_2: 1, grade_3: 2, grade_4: 3, grade_5: 4 };
     const base = baseMap[settings.baseDifficulty] || 3;
@@ -281,7 +289,7 @@ export default function App() {
     const prompt = `Write CHAPTER 1 of a ${settings.chaptersPerStory}-chapter comic-book-style story.
 
 CHARACTER: ${ctx.character?.name} — ${ctx.character?.tagline}
-${characterCanon() ? `CHARACTER CANON (must respect): ${characterCanon()}\n` : ''}SETTING (where it begins): ${ctx.setting}
+${characterCanon() ? `CHARACTER CANON (must respect): ${characterCanon()}\n` : ''}${characterTheme() ? `STORY STYLE FOR THIS HERO: ${characterTheme()}\n` : ''}SETTING (where it begins): ${ctx.setting}
 PROBLEM TO SOLVE: ${ctx.problem}
 HELPFUL ITEM: ${ctx.item}
 TONE: ${ctx.mood}
@@ -333,7 +341,7 @@ Chapter 1 must:
     const prompt = `Continue the story. This is CHAPTER ${idx + 1} of ${settings.chaptersPerStory}.
 
 CHARACTER: ${ctx.character?.name}
-${characterCanon() ? `CHARACTER CANON (must respect): ${characterCanon()}\n` : ''}SETTING start: ${ctx.setting}
+${characterCanon() ? `CHARACTER CANON (must respect): ${characterCanon()}\n` : ''}${characterTheme() ? `STORY STYLE FOR THIS HERO: ${characterTheme()}\n` : ''}SETTING start: ${ctx.setting}
 PROBLEM: ${ctx.problem}
 ITEM: ${ctx.item}
 TONE: ${ctx.mood}
