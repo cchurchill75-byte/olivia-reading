@@ -118,18 +118,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const img = extractImage(await gen.json());
     if (!img) return res.status(502).json({ error: 'no image returned from model' });
 
-    // 4) Store (Blob) or return inline.
+    // 4) Store (Blob) or return inline. If Blob fails (e.g. private store,
+    //    quota), fall back to an inline data URL so the panel still renders.
     logUsage('MISS', characterId, Date.now() - t0);
+    const dataUrl = `data:${img.mime};base64,${img.b64}`;
     if (haveBlob) {
-      const buffer = Buffer.from(img.b64, 'base64');
-      const { url } = await put(pathname, buffer, {
-        access: 'public',
-        contentType: 'image/png',
-        addRandomSuffix: false,
-      });
-      return res.status(200).json({ url, cached: false });
+      try {
+        const buffer = Buffer.from(img.b64, 'base64');
+        const { url } = await put(pathname, buffer, {
+          access: 'public',
+          contentType: 'image/png',
+          addRandomSuffix: false,
+        });
+        return res.status(200).json({ url, cached: false });
+      } catch (blobErr) {
+        console.warn('[illustrate] blob put failed, serving inline:', blobErr instanceof Error ? blobErr.message : blobErr);
+        return res.status(200).json({ url: dataUrl, cached: false, blobError: true });
+      }
     }
-    return res.status(200).json({ url: `data:${img.mime};base64,${img.b64}`, cached: false });
+    return res.status(200).json({ url: dataUrl, cached: false });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'unknown error';
     return res.status(500).json({ error: message });
