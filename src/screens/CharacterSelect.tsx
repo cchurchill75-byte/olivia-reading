@@ -1,6 +1,7 @@
 import type { Character } from '../types';
 import { RockyArt, MaineCoonArt, BunniforousArt } from '../data/characters';
 import { CustomHeroArt } from '../data/heroData';
+import { pickerPortrait } from '../lib/illustrate';
 
 interface CharacterSelectProps {
   value: string | null;
@@ -36,10 +37,13 @@ export default function CharacterSelect({
             <div className="portrait">
               <div className="halftone-bg"></div>
               <div className="speed"></div>
-              {c.art === 'rocky' && <RockyArt pose="portrait" />}
-              {c.art === 'mainecoon' && <MaineCoonArt pose="portrait" />}
-              {c.art === 'bunny' && <div className="photo-frame"><BunniforousArt pose="portrait" /></div>}
-              {c.art === 'custom' && <CustomHeroArt hero={c} />}
+              {pickerPortrait(c.id)
+                ? <img className="portrait-img" src={pickerPortrait(c.id)} alt={c.name} />
+                : c.art === 'rocky' ? <RockyArt pose="portrait" />
+                : c.art === 'mainecoon' ? <MaineCoonArt pose="portrait" />
+                : c.art === 'bunny' ? <div className="photo-frame"><BunniforousArt pose="portrait" /></div>
+                : c.art === 'custom' ? <CustomHeroArt hero={c} />
+                : null}
               <div className="name-stamp">{c.name.toUpperCase()}</div>
             </div>
             <h3>{c.name}<span className="pronounce">{c.pronounce}</span></h3>

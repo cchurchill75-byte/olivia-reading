@@ -5,8 +5,21 @@
 const REFERENCES: Record<string, string> = {
   rocky: '/refs/rocky.png',
   bunniforous: '/refs/bunniforous.png',
-  // mainecoon: '/refs/mainecoon.png',  // add as references are created
+  mainecoon: '/refs/mainecoon.png',
 };
+
+// Portrait images shown on the character picker (may differ from the panel
+// reference — e.g. the Maine Coon's card shows a child for scale).
+const CARD_PORTRAITS: Record<string, string> = {
+  rocky: '/refs/rocky.png',
+  bunniforous: '/refs/bunniforous.png',
+  mainecoon: '/refs/mainecoon-card.png',
+};
+
+/** Picker portrait image for a built-in character, or undefined (e.g. custom heroes). */
+export function pickerPortrait(id: string): string | undefined {
+  return CARD_PORTRAITS[id];
+}
 
 export function characterSupportsIllustration(id?: string | null): boolean {
   return !!(id && REFERENCES[id]);
