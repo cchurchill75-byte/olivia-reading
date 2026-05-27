@@ -34,8 +34,10 @@ export default function ComicPage({ chapter, characterId, setting, chapterIdx, t
     [chapter, characterId, setting, chapterIdx, totalChapters],
   );
 
-  // Illustrated path: characters with a reference image get AI-drawn panels.
-  const illPanels = (chapter.panels || []).filter((p) => p.imagePrompt);
+  // Illustrated path: only when panels actually have generated images. If
+  // illustration is unavailable or failed (no API key, error, etc.), fall back
+  // to the SVG comic below so we never show blank panels in production.
+  const illPanels = (chapter.panels || []).filter((p) => p.imageUrl);
   if (characterSupportsIllustration(characterId) && illPanels.length > 0) {
     return <IllustratedComic panels={illPanels} />;
   }
