@@ -70,38 +70,44 @@ export function deleteHero(id: string): Character[] {
 }
 
 /* =============================================================
-   Eye helper
+   Eye helper (now expression-aware)
 ============================================================= */
 interface Palette { body: string; accent: string }
 interface Accent { glow: string }
 
-function HeroEyes({ cx, cy, gap = 50, size = 14, style = 'round' }: { cx: number; cy: number; gap?: number; size?: number; style?: string }) {
+export type HeroExpression = 'neutral' | 'happy' | 'determined' | 'surprised' | 'worried';
+
+function HeroEyes({ cx, cy, gap = 50, size = 14, style = 'round', expression = 'neutral' as HeroExpression }: { cx: number; cy: number; gap?: number; size?: number; style?: string; expression?: HeroExpression }) {
   const lx = cx - gap / 2;
   const rx = cx + gap / 2;
+
+  const yOffset = expression === 'surprised' ? -2 : expression === 'worried' ? 3 : 0;
+  const eyeRy = size * 0.95 * (expression === 'surprised' ? 1.2 : 1);
+
   if (style === 'sleepy') {
     return (
       <g stroke="#0c0a14" strokeWidth={Math.max(3, size / 3)} fill="none" strokeLinecap="round">
-        <path d={`M${lx - size},${cy} Q${lx},${cy + size * 0.7} ${lx + size},${cy}`} />
-        <path d={`M${rx - size},${cy} Q${rx},${cy + size * 0.7} ${rx + size},${cy}`} />
+        <path d={`M${lx - size},${cy + yOffset} Q${lx},${cy + size * 0.7 + yOffset} ${lx + size},${cy + yOffset}`} />
+        <path d={`M${rx - size},${cy + yOffset} Q${rx},${cy + size * 0.7 + yOffset} ${rx + size},${cy + yOffset}`} />
       </g>
     );
   }
   if (style === 'sparkly') {
     return (
       <g fill="#0c0a14">
-        <path d={`M${lx},${cy - size} L${lx + size * 0.45},${cy} L${lx},${cy + size} L${lx - size * 0.45},${cy} Z`} />
-        <path d={`M${rx},${cy - size} L${rx + size * 0.45},${cy} L${rx},${cy + size} L${rx - size * 0.45},${cy} Z`} />
-        <circle cx={lx - size * 0.18} cy={cy - size * 0.32} r={size * 0.22} fill="#fff" />
-        <circle cx={rx - size * 0.18} cy={cy - size * 0.32} r={size * 0.22} fill="#fff" />
+        <path d={`M${lx},${cy - size + yOffset} L${lx + size * 0.45},${cy + yOffset} L${lx},${cy + size + yOffset} L${lx - size * 0.45},${cy + yOffset} Z`} />
+        <path d={`M${rx},${cy - size + yOffset} L${rx + size * 0.45},${cy + yOffset} L${rx},${cy + size + yOffset} L${rx - size * 0.45},${cy + yOffset} Z`} />
+        <circle cx={lx - size * 0.18} cy={cy - size * 0.32 + yOffset} r={size * 0.22} fill="#fff" />
+        <circle cx={rx - size * 0.18} cy={cy - size * 0.32 + yOffset} r={size * 0.22} fill="#fff" />
       </g>
     );
   }
   return (
     <g>
-      <ellipse cx={lx} cy={cy} rx={size * 0.55} ry={size * 0.95} fill="#0c0a14" />
-      <ellipse cx={rx} cy={cy} rx={size * 0.55} ry={size * 0.95} fill="#0c0a14" />
-      <circle cx={lx + size * 0.22} cy={cy - size * 0.4} r={size * 0.28} fill="#fff" />
-      <circle cx={rx + size * 0.22} cy={cy - size * 0.4} r={size * 0.28} fill="#fff" />
+      <ellipse cx={lx} cy={cy + yOffset} rx={size * 0.55} ry={eyeRy} fill="#0c0a14" />
+      <ellipse cx={rx} cy={cy + yOffset} rx={size * 0.55} ry={eyeRy} fill="#0c0a14" />
+      <circle cx={lx + size * 0.22} cy={cy - size * 0.4 + yOffset} r={size * 0.28} fill="#fff" />
+      <circle cx={rx + size * 0.22} cy={cy - size * 0.4 + yOffset} r={size * 0.28} fill="#fff" />
     </g>
   );
 }
@@ -109,7 +115,14 @@ function HeroEyes({ cx, cy, gap = 50, size = 14, style = 'round' }: { cx: number
 /* =============================================================
    Shape components
 ============================================================= */
-function BuddyHero({ palette, accent, eyes }: { palette: Palette; accent: Accent; eyes: string }) {
+function BuddyHero({ palette, accent, eyes, expression = 'neutral' as HeroExpression }: { palette: Palette; accent: Accent; eyes: string; expression?: HeroExpression }) {
+  // Expression-driven mouth (the highest impact, lowest risk change)
+  let mouthPath = "M184,182 Q200,196 216,182"; // neutral - current default
+  if (expression === 'happy')    mouthPath = "M182,190 Q200,208 218,190";
+  if (expression === 'determined') mouthPath = "M186,185 Q200,192 214,185";
+  if (expression === 'surprised')  mouthPath = "M188,187 Q200,196 212,187";
+  if (expression === 'worried')    mouthPath = "M186,195 Q200,183 214,195";
+
   return (
     <g>
       <ellipse cx="172" cy="358" rx="20" ry="32" fill={palette.body} stroke="#0c0a14" strokeWidth="4.5" />
@@ -127,8 +140,8 @@ function BuddyHero({ palette, accent, eyes }: { palette: Palette; accent: Accent
       <path d="M152,108 Q170,72 192,86 Q200,76 210,86 Q230,72 248,108 Q232,122 200,122 Q168,122 152,108 Z" fill={palette.accent} stroke="#0c0a14" strokeWidth="4" strokeLinejoin="round" />
       <circle cx="158" cy="172" r="11" fill={accent.glow} opacity="0.6" />
       <circle cx="242" cy="172" r="11" fill={accent.glow} opacity="0.6" />
-      <HeroEyes cx={200} cy={150} gap={42} size={13} style={eyes} />
-      <path d="M184,182 Q200,196 216,182" stroke="#0c0a14" strokeWidth="4" fill="none" strokeLinecap="round" />
+      <HeroEyes cx={200} cy={150} gap={42} size={13} style={eyes} expression={expression} />
+      <path d={mouthPath} stroke="#0c0a14" strokeWidth="4" fill="none" strokeLinecap="round" />
       <g className="rk-crystal" transform="translate(200,265)">
         <path d="M0,12 Q-16,-2 -10,-14 Q-2,-15 0,-6 Q2,-15 10,-14 Q16,-2 0,12 Z" fill={accent.glow} stroke="#0c0a14" strokeWidth="3.5" strokeLinejoin="round" />
       </g>
@@ -246,7 +259,7 @@ export const SHAPE_COMPS: Record<string, React.FC<any>> = {
 /* =============================================================
    CustomHeroArt
 ============================================================= */
-export function CustomHeroArt({ hero, withFx = true }: { hero: Character; withFx?: boolean }) {
+export function CustomHeroArt({ hero, withFx = true, expression = 'neutral' }: { hero: Character; withFx?: boolean; expression?: HeroExpression }) {
   const palette = HERO_PALETTES.find((p) => p.id === hero.bodyPalette) || HERO_PALETTES[0];
   const accent = HERO_ACCENTS.find((a) => a.id === hero.accentPalette) || HERO_ACCENTS[0];
   const eyes = hero.eyes || 'round';
@@ -266,7 +279,7 @@ export function CustomHeroArt({ hero, withFx = true }: { hero: Character; withFx
       )}
       <ellipse cx="200" cy="380" rx="150" ry="12" fill="#0c0a14" opacity="0.28" />
       <g className="rk-bob">
-        <Comp palette={palette} accent={accent} eyes={eyes} />
+        <Comp palette={palette} accent={accent} eyes={eyes} expression={expression} />
       </g>
     </svg>
   );
