@@ -101,7 +101,11 @@ button { font: inherit; cursor: pointer; }
 .app {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 24px 24px 140px;
+  padding:
+    calc(24px + env(safe-area-inset-top))
+    calc(24px + env(safe-area-inset-right))
+    calc(140px + env(safe-area-inset-bottom))
+    calc(24px + env(safe-area-inset-left));
   position: relative;
 }
 
@@ -2188,6 +2192,87 @@ button, .btn, .tool-btn, .char-card, .setup-option, .choice-btn,
   .setup-option { min-height: 140px; }
   .story-text .w { padding: 2px 3px; }   /* easier to tap individual words */
   .word-popover .row .mini { padding: 10px 16px; min-height: 40px; font-size: 14px; }
+}
+
+/* === iPhone (portrait + narrow widths) — under ~600px === */
+@media (max-width: 600px) {
+  .app {
+    padding:
+      calc(14px + env(safe-area-inset-top))
+      calc(14px + env(safe-area-inset-right))
+      calc(96px + env(safe-area-inset-bottom))
+      calc(14px + env(safe-area-inset-left));
+    max-width: 100%;
+  }
+  .topbar { gap: 8px; margin-bottom: 14px; }
+  .brand { font-size: 18px; gap: 10px; }
+  .brand .logo { width: 40px; height: 40px; font-size: 20px; }
+  .brand .ja { font-size: 10px; letter-spacing: 0.16em; }
+  .hud { gap: 6px; flex-wrap: wrap; }
+  .hud-chip { padding: 6px 10px 6px 8px; font-size: 13px; min-height: 36px; }
+  .xp-bar { width: 48px; }
+
+  .welcome { gap: 20px; min-height: auto; }
+  .welcome h1 { font-size: clamp(40px, 12vw, 60px); }
+  .welcome p.lede, .welcome .lede { font-size: 16px; }
+
+  .section-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .section-head h2 { font-size: clamp(32px, 9vw, 44px); }
+
+  /* Picker — single column on phones for readable cards */
+  .char-grid { grid-template-columns: 1fr; gap: 14px; }
+  .char-card { padding: 16px; }
+  .char-card h3 { font-size: 24px; }
+
+  /* Setup options — two across, smaller */
+  .setup-options { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .setup-option { min-height: 84px; padding: 10px 12px; }
+  .setup-option .opt-label { font-size: 16px; }
+  .setup-option .opt-sub { font-size: 11px; }
+
+  /* Comic panels — stack vertically so each illustration is readable */
+  .manga-panels {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(3, minmax(140px, 1fr));
+    height: auto;
+    aspect-ratio: 3 / 4;
+  }
+  .manga-panels.comic-ill-3 { grid-template-columns: 1fr; grid-template-rows: repeat(3, 1fr); aspect-ratio: 3 / 4; }
+  .manga-panels.comic-ill-2 { grid-template-columns: 1fr; grid-template-rows: repeat(2, 1fr); aspect-ratio: 4 / 5; }
+  .manga-panel:nth-child(1) { grid-row: auto; }
+
+  :root { --reader-size: 19px; --reader-line: 1.65; }
+  .reader-tools { gap: 8px; flex-wrap: wrap; }
+}
+
+/* === Phone LANDSCAPE — short height, wide aspect === */
+@media (orientation: landscape) and (max-height: 500px) {
+  .app {
+    padding:
+      calc(10px + env(safe-area-inset-top))
+      calc(20px + env(safe-area-inset-right))
+      calc(70px + env(safe-area-inset-bottom))
+      calc(20px + env(safe-area-inset-left));
+    max-width: 100%;
+  }
+  .topbar { margin-bottom: 10px; gap: 8px; }
+  .welcome { grid-template-columns: 1.1fr 0.9fr; gap: 18px; min-height: auto; }
+  .welcome h1 { font-size: clamp(36px, 6vw, 52px); }
+
+  /* Picker — 2 cards across in landscape */
+  .char-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+  /* Comic panels — horizontal strip of 3 small panels fits the wide aspect */
+  .manga-panels {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr;
+    height: 200px;
+    aspect-ratio: auto;
+  }
+  .manga-panels.comic-ill-3 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr; aspect-ratio: auto; }
+  .manga-panels.comic-ill-2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: 1fr; aspect-ratio: auto; }
+  .manga-panel:nth-child(1) { grid-row: auto; }
+}
   /* TweaksPanel close button etc */
   input, textarea, select { font-size: 16px; }  /* prevents iOS auto-zoom on focus */
 }
