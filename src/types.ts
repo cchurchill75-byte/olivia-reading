@@ -55,6 +55,8 @@ export interface SetupOption {
   label: string;
   sub: string;
   icon: string;
+  /** Restrict this option to specific character ids; if omitted, it's universal. */
+  for?: string[];
 }
 
 export interface SetupQuestion {

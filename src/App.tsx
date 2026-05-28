@@ -80,8 +80,10 @@ export default function App() {
   const [editingHero, setEditingHero] = useState<Character | null>(null);
   const allCharacters = useMemo(() => [...CHARACTERS, ...customHeroes], [customHeroes]);
 
-  // session setup questions
+  // session setup questions — re-rolled whenever the chosen hero changes so the
+  // options match the character (Rocky -> space, Bunniforous -> mischief, etc.).
   const [sessionSetup, setSessionSetup] = useState<SetupQuestion[]>(() => getSessionSetupQuestions());
+  useEffect(() => { setSessionSetup(getSessionSetupQuestions(characterId)); }, [characterId]);
 
   const [fontStep, setFontStep] = useState(2);
   const [highlightTricky, setHighlightTricky] = useState(true);
@@ -165,7 +167,7 @@ export default function App() {
     setSessionStartTime(Date.now());
     setCombo(0);
     setBestCombo(0);
-    setSessionSetup(getSessionSetupQuestions());
+    setSessionSetup(getSessionSetupQuestions(characterId));
     setStage('character');
   };
 
