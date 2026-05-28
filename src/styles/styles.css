@@ -2273,9 +2273,8 @@ button, .btn, .tool-btn, .char-card, .setup-option, .choice-btn,
   .manga-panels.comic-ill-2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: 1fr; aspect-ratio: auto; }
   .manga-panel:nth-child(1) { grid-row: auto; }
 }
-  /* TweaksPanel close button etc */
-  input, textarea, select { font-size: 16px; }  /* prevents iOS auto-zoom on focus */
-}
+/* Prevent iOS auto-zoom when focusing inputs (16px+ font is the threshold). */
+input, textarea, select { font-size: 16px; }
 
 /* Respect safe area on notched iPads / fullscreen PWA */
 .app {
