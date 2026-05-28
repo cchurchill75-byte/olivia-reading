@@ -31,9 +31,9 @@
   --accent-3: var(--c-blue);
   --accent-4: var(--c-mint);
 
-  /* fonts — keep manga ones, add comic hand-letter */
-  --font-letter: "Patrick Hand", "Caveat Brush", cursive;
-  --font-comic-title: "Bowlby One", "Bangers", "Impact", sans-serif;
+  /* fonts — match the de-manga clean reader look (was Patrick Hand / Bowlby One) */
+  --font-letter: "Lexend", system-ui, sans-serif;
+  --font-comic-title: "Fredoka", "Lexend", system-ui, sans-serif;
 
   --ink-w: 4px;
   --ink-w-fat: 6px;
